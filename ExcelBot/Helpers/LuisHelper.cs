@@ -78,7 +78,7 @@ namespace ExcelBot.Helpers
                  * Checking for null value in StartIndex. Result returned by wit does not contain StartIndex and EndIndex or Entities.
                  * Hence, in such case, we pick up the entity directly. 
                  */
-                if (result.Entities[0].StartIndex != null)
+                if (first.StartIndex != null)
                 {
                     var startIndex = (int)(result.Entities.Where(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook"))).Min(er => er.StartIndex));
                     var endIndex = (int)(result.Entities.Where(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook"))).Max(er => er.EndIndex));
@@ -86,7 +86,24 @@ namespace ExcelBot.Helpers
                 }
                 else
                 {
-                    return result.Entities[0].Entity;
+                    /*
+                     * Check if there are multiple text intent.
+                     * 
+                     */
+                    List<EntityRecommendation> textEntites = result.Entities.Where(er => ((er.Type == "Text"))).ToList();
+                    if (textEntites.Count > 0)
+                    {
+                        var textToReturn = "";
+                        foreach (EntityRecommendation entityRecommendation in textEntites)
+                        {
+                            textToReturn += entityRecommendation.Entity;
+                        }
+                        return textToReturn;
+                    }
+                    else
+                    {
+                        return first.Entity;
+                    }
                 }
             }
 
